@@ -1,10 +1,8 @@
 package com.adobe.test;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -131,7 +129,7 @@ public class WebServer {
 		try {
 			String propFileName = "config.properties";
  
-			inputStream = new FileInputStream(propFileName);
+			inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);//new FileInputStream(propFileName);
  
 			if (inputStream != null) {
 				prop.load(inputStream);
@@ -146,9 +144,6 @@ public class WebServer {
                 }
 				//throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
 			}
- 
-			Date time = new Date(System.currentTimeMillis());
- 
 			inputStream.close();
 		} catch (Exception e) {
 			System.out.println("Exception: " + e);

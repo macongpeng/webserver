@@ -10,6 +10,7 @@ It is based the sample from [Shubhs Blog](https://www.shubhsblog.com/programming
 * Log4j to manage the logging
 * Maven based project which manage the dependencies more easily
 * Junit for unit tests
+* The code coverage for the project by jacoco
 * Support SVG file type
 * Support http request for static file with parameters (won't process parameters for now)
 
@@ -27,6 +28,5 @@ otherwise
 Run `sudo java -jar javawebserver-1.0-SNAPSHOT.jar`
 
 ### Todo list:
-* Add the code coverage for the project
+
 * Support most popular file types
-* Process the parameters in the query for the static file
