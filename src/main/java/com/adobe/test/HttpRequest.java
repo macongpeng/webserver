@@ -4,13 +4,20 @@ import java.io.*;
 import java.net.*;
 import java.security.cert.CRL;
 import java.util.*;
+
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 public final class HttpRequest implements Runnable {
 
 	final static Logger logger = LogManager.getLogger(HttpRequest.class);
 	final static String CRLF = "\r\n";// For convenience
+    final static String TEMP_KEY = "temp";
+
     public static final int HTTP_BAD_METHOD = 405;
 	Socket socket;
 
@@ -60,6 +67,11 @@ public final class HttpRequest implements Runnable {
             if (logger.isDebugEnabled()) {
                 logger.debug("The coming request is :" + requestLine);
             }
+            if (requestLine == null || requestLine.equals(""))
+            {
+                // If the coming request is null, stop serving this request and move on to the next one
+                break;
+            }
 
             // The following obtains the IP address of the incoming connection.
             InetAddress incomingAddress = socket.getInetAddress();
@@ -69,6 +81,7 @@ public final class HttpRequest implements Runnable {
                 logger.debug("The incoming address is:   " + ipString);
             }
 
+            // TODO: current model doesn't support space in the parameters
             // String Tokenizer is used to extract file name from this class.
             StringTokenizer tokens = new StringTokenizer(requestLine);
             // Get the request type
@@ -86,17 +99,20 @@ public final class HttpRequest implements Runnable {
             }
 
             String fileName = tokens.nextToken();
+            String query = "";
             // Check if the fileName contains ?
             int questionMarkIndex = fileName.indexOf('?');
             if (questionMarkIndex != -1)
             {
                 // Just take the file name for now and drop the query parameters
-                // TODO: handle query parameters
+                query = fileName.substring(questionMarkIndex + 1);
                 fileName = fileName.substring(0, questionMarkIndex);
-            }
-            // Prepend a “.” so that file request is within the current directory.
-            fileName = "." + fileName;
 
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Request fileName is :" + fileName + " query is :" + query);
+                }
+
+            }
             // Process the header to check if keep alive is disabled
             String headerLine = null;
             while ((headerLine = br.readLine()).length() != 0) { // While the header
@@ -117,6 +133,15 @@ public final class HttpRequest implements Runnable {
                 fileRequested = new File(fileWithPath);
                 fis = new FileInputStream(fileRequested);
                 fileExists = true;
+
+                if (query != null && !query.equals(""))
+                {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Process the query of " + query);
+                    }
+                    // Store the query to the file before send it back
+                    processQuery(fileWithPath, query);
+                }
             } catch (FileNotFoundException e) {
                 fileExists = false;
             }
@@ -200,7 +225,64 @@ public final class HttpRequest implements Runnable {
         }
 	}
 
-	// Need this one for sendBytes function called in processRequest
+	// Process the query and store the value to the file
+    // For now, only process tempature
+    private void processQuery(String file, String query){
+        // Only process when the fileName is with json extension
+        if (FilenameUtils.getExtension(file).equalsIgnoreCase("json")) {
+            Map<String, String> queryPairs = splitQuery(query);
+            // Get the temp value from the query
+            String key = queryPairs.get("key");
+            if (logger.isDebugEnabled()) {
+                logger.debug("The key in the query is  " + key);
+            }
+            // TODO should validate temp
+            if (key != null && TEMP_KEY.equals(key)) {
+                String temp = queryPairs.get("value");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("The value in the query is  " + temp);
+                }
+                // Load JsObjects from the file
+                JSONParser parser = new JSONParser();
+                try {
+
+                    Object obj = parser.parse(new FileReader(file));
+                    JSONObject jsonObject = (JSONObject) obj;
+                    jsonObject.put(TEMP_KEY, temp);
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("The new json is:" + jsonObject.toJSONString());
+                    }
+                    //jsonObject.writeJSONString(new PrintWriter(file));
+                    FileWriter fileWriter = new FileWriter(file);
+                    fileWriter.write(jsonObject.toJSONString());
+
+                    fileWriter.flush();
+                    fileWriter.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    // Process the query and split it to a map with key and value pairs
+	private Map<String, String> splitQuery(String query) {
+        Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            try {
+                query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+            }
+            catch(UnsupportedEncodingException e)
+            {
+                // If unsupported encoding Exception happens, just ignore the key value pair
+                continue;
+            }
+        }
+        return query_pairs;
+    }
+    // Need this one for sendBytes function called in processRequest
 	private static void sendBytes(FileInputStream fis, OutputStream os)
 			throws Exception {
         if (logger.isDebugEnabled())
