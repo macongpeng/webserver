@@ -33,4 +33,4 @@ Run `sudo java -jar javawebserver-1.0-SNAPSHOT.jar`
 * Support most popular file types
 * Coverage is over the quality gate 85%
 
-![Code Coverage]
+![Code Coverage](https://github.com/macongpeng/webserver/blob/master/images/codecoverage.png)
