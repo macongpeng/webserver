@@ -13,6 +13,7 @@ It is based the sample from [Shubhs Blog](https://www.shubhsblog.com/programming
 * The code coverage for the project by jacoco
 * Support SVG file type
 * Support http request for static file with parameters (won't process parameters for now)
+* Cleaner logging code using Java 8 lambdas
 
 ### Instructions on how to run the web server
 * Create a folder for the web server
@@ -30,3 +31,6 @@ Run `sudo java -jar javawebserver-1.0-SNAPSHOT.jar`
 ### Todo list:
 
 * Support most popular file types
+* Coverage is over the quality gate 85%
+
+![Code Coverage]
