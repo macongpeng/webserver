@@ -17,11 +17,11 @@ It is based the sample from [Shubhs Blog](https://www.shubhsblog.com/programming
 ### Instructions on how to run the web server
 * Create a folder for the web server
 * Copy javawebserver-1.0-SNAPSHOT.jar to the folder
-* Optional: create your own log4j2.xml (refer to the one in src/resources/) and config.properties (refer to the one in config folder)
+* Optional: create your own [log4j2.xml](https://github.com/macongpeng/webserver/blob/master/src/main/resources/log4j2.xml) and [config.properties](https://github.com/macongpeng/webserver/blob/master/src/main/resources/config.properties)
 
-Assume you have your own log4j2.xml and it is Mac OS or linux. 
+Assume you have your own log4j2.xml and the OS is Mac OS or linux. 
 
-Run `sudo java -Dlog4j.configurationFile=log4j2.xml -jar javawebserver-1.0-SNAPSHOT.jar`
+Run `sudo java -classpath .:./javawebserver-1.0-SNAPSHOT.jar -Dlog4j.configurationFile=log4j2.xml com.adobe.test.WebServer`
 
 otherwise
 
