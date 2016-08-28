@@ -233,15 +233,11 @@ public final class HttpRequest implements Runnable {
             Map<String, String> queryPairs = splitQuery(query);
             // Get the temp value from the query
             String key = queryPairs.get("key");
-            if (logger.isDebugEnabled()) {
-                logger.debug("The key in the query is  " + key);
-            }
+            logger.debug(() -> "The key in the query is  " + key);
             // TODO should validate temp
             if (key != null && TEMP_KEY.equals(key)) {
                 String temp = queryPairs.get("value");
-                if (logger.isDebugEnabled()) {
-                    logger.debug("The value in the query is  " + temp);
-                }
+                logger.debug(() -> "The value in the query is  " + temp);
                 // Load JsObjects from the file
                 JSONParser parser = new JSONParser();
                 try {
@@ -250,9 +246,7 @@ public final class HttpRequest implements Runnable {
                     JSONObject jsonObject = (JSONObject) obj;
                     jsonObject.put(TEMP_KEY, temp);
 
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("The new json is:" + jsonObject.toJSONString());
-                    }
+                    logger.debug(() -> "The new json is:" + jsonObject.toJSONString());
                     //jsonObject.writeJSONString(new PrintWriter(file));
                     FileWriter fileWriter = new FileWriter(file);
                     fileWriter.write(jsonObject.toJSONString());
@@ -285,10 +279,8 @@ public final class HttpRequest implements Runnable {
     // Need this one for sendBytes function called in processRequest
 	private static void sendBytes(FileInputStream fis, OutputStream os)
 			throws Exception {
-        if (logger.isDebugEnabled())
-        {
-            logger.traceEntry("sendBytes@HttpRequest");
-        }
+
+        logger.traceEntry(() -> "sendBytes@HttpRequest");
 		// Construct a 1K buffer to hold bytes on their way to the socket.
 		byte[] buffer = new byte[1024];
 		int bytes = -1;
@@ -297,18 +289,13 @@ public final class HttpRequest implements Runnable {
 		while ((bytes = fis.read(buffer)) != -1) {
 			os.write(buffer, 0, bytes);
 		}
-        if (logger.isDebugEnabled())
-        {
-            logger.traceExit("sendBytes@HttpRequest");
-        }
+        logger.debug(() -> "sendBytes@HttpRequest");
 	}
 
 	// TODO: to support more types
 	private static String contentType(String fileName) {
-        if (logger.isDebugEnabled())
-        {
-            logger.traceEntry("contentType@HttpRequest with fileName:" + fileName);
-        }
+
+	    logger.traceEntry(() -> "contentType@HttpRequest with fileName:" + fileName);
         String contentType = "application/octet-stream";
 		if (fileName.endsWith(".htm") || fileName.endsWith(".html")) {
             contentType = "text/html";
@@ -320,10 +307,9 @@ public final class HttpRequest implements Runnable {
             contentType = "image/svg+xml";
         }
 
-        if (logger.isDebugEnabled())
-        {
-            logger.traceEntry("contentType@HttpRequest return :" + contentType);
-        }
-		return contentType;
+        final String result = contentType;
+        logger.debug(() -> "contenthnType@HttpRequest return :" + result);
+
+		return result;
 	}
 }
